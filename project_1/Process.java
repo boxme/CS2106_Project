@@ -1,13 +1,13 @@
 import java.util.*;
 
 public class Process {
-    private int id;
+    private final int id;
     private ProcessType type;
 
     private Process parent;
-    private ArrayList<Process> children;
+    private final ArrayList<Process> children;
 
-    private ProcessPriority priority;
+    private final ProcessPriority priority;
 
     private ArrayList<Process> list;
 
