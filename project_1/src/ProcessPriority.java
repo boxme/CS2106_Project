@@ -10,5 +10,11 @@ public enum ProcessPriority {
     public int getLevel() {
         return level;
     }
+
+    public static ProcessPriority priority(int priority) {
+        if (priority == 0)      return ProcessPriority.INIT;
+        else if (priority == 1) return ProcessPriority.USER;
+        else                    return ProcessPriority.SYSTEM;
+    }
 }
 

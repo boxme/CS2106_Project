@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Process {
-    private final int id;
+    private final String id;
     private ProcessType type;
 
     private Process parent;
@@ -9,9 +9,9 @@ public class Process {
 
     private final ProcessPriority priority;
 
-    private ArrayList<Process> list;
+    private LinkedList<Process> list;
 
-    public Process(ProcessPriority priority, int id) {
+    public Process(ProcessPriority priority, String id) {
         this.priority = priority;
         this.id = id;
         this.type = ProcessType.READY;
@@ -50,7 +50,15 @@ public class Process {
         return priority;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
+    }
+
+    public void setList(LinkedList<Process> list) {
+        this.list = list;
+    }
+
+    public LinkedList<Process> getList() {
+        return list;
     }
 }
