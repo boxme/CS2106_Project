@@ -18,22 +18,31 @@ public class Process {
         resList = new LinkedList<>();
     }
     
-    public void reqRes(String resId, int resUnits) {
-        resUnits = (resUnits < 5) ? resUnits : 4;
+    /**
+     * @return res units allocated to process
+     */
+    public int reqRes(String resId, int resUnits) {
         final int size = resList.size();
-        AllocatedRes res; boolean found = false;
-        
+        AllocatedRes res; 
+        boolean found = false;
+        int allocatedUnits = resUnits;
+
         for (int i = 0; i < size; ++i) {
             res = resList.get(i);
             if (res.getResId().equalsIgnoreCase(resId)) {
-                res.setRequestedUnits(resUnits); found = true;
+                allocatedUnits = res.setRequestedUnits(resUnits); 
+                found = true;
             }
         }
         
-        if (!found) { res = new AllocatedRes(resId, resUnits); resList.offer(res); }
+        if (!found) {
+            res = new AllocatedRes(resId, resUnits); 
+            resList.offer(res); 
+        }
+
+        return allocatedUnits;
     }
     
-
     public void setParent(Process parent) { this.parent = parent; }
     
     public Process getParent() { return parent; }
@@ -70,14 +79,19 @@ public class Process {
         public String getResId() {
             return resId;
         }
-        
-        public boolean setRequestedUnits(int requestedUnits) {
-            if (this.requestedUnits + requestedUnits < 5) {
-                this.requestedUnits += requestedUnits;
-                return true;
+      
+        /**
+         * @return actual units allocated
+         */
+        public int setRequestedUnits(int reqUnits) {
+            if (this.requestedUnits + reqUnits <= Resource.MAX_UNIT) {
+                this.requestedUnits += reqUnits;
+                return reqUnits;
+            } else {
+                final int prevReqUnits = this.requestedUnits;
+                this.requestedUnits = Resource.MAX_UNIT;
+                return this.requestedUnits - prevReqUnits;
             }
-
-            return false;
         }
 
         public int getReqUnits() {

@@ -18,10 +18,10 @@ public class Manager {
         final String r3 = "R3";
         final String r4 = "R4";
 
-        resources.put(r1, new Resource(r1, 4));
-        resources.put(r2, new Resource(r2, 4));
-        resources.put(r3, new Resource(r3, 4));
-        resources.put(r4, new Resource(r4, 4));
+        resources.put(r1, new Resource(r1));
+        resources.put(r2, new Resource(r2));
+        resources.put(r3, new Resource(r3));
+        resources.put(r4, new Resource(r4));
     }
 
     public static Manager getInstance() {
