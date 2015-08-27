@@ -4,12 +4,24 @@ public class Manager {
     private static Manager sInstance;
     private ArrayList<LinkedList<Process>> readyList;
     private Process current;
+    private HashMap<String, Resource> resources;
 
     private Manager() {
         readyList = new ArrayList<>(3);
         for (int i = 0; i < 3; ++i) {
             readyList.add(new LinkedList<>());
         }
+        
+        resources = new HashMap<>();
+        final String r1 = "R1";
+        final String r2 = "R2";
+        final String r3 = "R3";
+        final String r4 = "R4";
+
+        resources.put(r1, new Resource(r1, 4));
+        resources.put(r2, new Resource(r2, 4));
+        resources.put(r3, new Resource(r3, 4));
+        resources.put(r4, new Resource(r4, 4));
     }
 
     public static Manager getInstance() {
@@ -18,6 +30,15 @@ public class Manager {
         }
 
         return sInstance;
+    }
+
+    public void reqRes(String resId, int reqUnits) {
+        Resource res = resources.get(resId);
+        boolean isSuccess = res.isRequestSuccessfull(reqUnits, current);
+        if (!isSuccess) {
+            current = null;
+        }
+        schedule();
     }
 
     public void timeOut() {
@@ -75,8 +96,7 @@ public class Manager {
         boolean hasSwitchContext = true;
 
         if (current != null) {
-            if (current.getPriority().getLevel() < process.getPriority().getLevel()
-                    || !ProcessType.RUNNING.equals(current.getType())) {
+            if (current.getPriority().getLevel() < process.getPriority().getLevel()) {
                 insertProcessIntoReadyList(current);
             } else {
                 hasSwitchContext = false;

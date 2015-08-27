@@ -1,17 +1,42 @@
 import java.util.*;
 
 public class Resource {
-    private final int id;
+    private final String id;
     
     private final int totalUnits;
     private int freeUnits;
 
-    private final ArrayList<Process> waitingList;
+    private final LinkedList<Process> waitingList;
 
-    public Resource(int id, int totalUnits) {
+    public Resource(String id, int totalUnits) {
         this.id = id;
         this.totalUnits = totalUnits;
         freeUnits = totalUnits;
-        waitingList = new ArrayList<>();
+        waitingList = new LinkedList<>();
+    }
+
+    public boolean isRequestSuccessfull(int allocatedUnits, Process process) {
+        boolean isSuccess = freeUnits >= allocatedUnits;
+        freeUnits = isSuccess ? (freeUnits - allocatedUnits) : freeUnits;
+        if (!isSuccess) {
+            process.setType(ProcessType.BLOCKED);
+            process.setList(waitingList);
+            waitingList.offer(process);
+        }
+
+        process.reqRes(id, allocatedUnits);
+        return isSuccess;
+    }
+
+    public LinkedList<Process> getWaitingList() {
+        return waitingList;
+    }
+
+    public int getTotalUnits() {
+        return totalUnits;
+    }
+
+    public int getNumOfFreeUnits() {
+        return freeUnits;
     }
 }

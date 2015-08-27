@@ -16,40 +16,46 @@ public class TestShell {
 
         while (true) {
             switch (sc.next()) {
-                case "init":
-
+                case "init": {
+                    manager.createProcess(ProcessPriority.INIT, "INIT");
                     break;
-
-                case "cr":
+                }
+                case "cr": {
                     final String id = sc.next();
                     final ProcessPriority priority = ProcessPriority.priority(sc.nextInt());
                     manager.createProcess(priority, id);
                     break;
-
-                case "de":
+                }
+                case "de": {
+                    final String processId = sc.next();
                     break;
-
-                case "req":
+                }
+                case "req": {
+                    final String resName = sc.next();
+                    final int unitsAllocated = sc.nextInt();
                     break;
-
-                case "rel":
+                }
+                case "rel": {
+                    final String resName = sc.next();
+                    final int unitsFreed = sc.nextInt();
                     break;
-
-                case "to":
+                }
+                case "to": {
                     manager.timeOut();
                     break;
-
-                case "help":
+                }
+                case "help": {
                     break;
-
-                case "exit":
+                }
+                case "exit": {
                     sc.close();
                     System.exit(0);
                     break;
-                
-                case "details":
+                } 
+                case "details": {
                    // Print all details
                    break;
+                }
             }
         }
     }
