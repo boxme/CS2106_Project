@@ -51,6 +51,15 @@ public class Process {
         return releasedUnits;
     }
 
+    public boolean isProcessWaitingForRes(String resId) {
+        AllocatedRes res = getRes(resId);
+        if (res != null) {
+            return res.getWaitingUnits() == 0;
+        }
+
+        return false;
+    }
+
     public boolean isProcessFree() {
         boolean isFree = true;
         final int size = resList.size();
@@ -98,6 +107,17 @@ public class Process {
     public LinkedList<Process> getList() { return list; }
 
     public LinkedList<AllocatedRes> getResList() { return resList; }
+
+    public String getResInfo() {
+        String result = " ";
+        AllocatedRes res;
+        final int size = resList.size();
+        for (int i = 0; i < size; ++i) {
+            res = resList.get(i);
+            result += res.getInfo();
+        }
+        return result;
+    }
     
     private static class AllocatedRes {
         private String resId;
@@ -108,6 +128,10 @@ public class Process {
             this.resId = resId;
             this.waitingUnits = requestedUnits;
             this.allocatedUnits = 0;
+        }
+
+        public String getInfo() {
+            return "Res: " + resId + " allocated: " + allocatedUnits + " waiting: " + waitingUnits + "\n";
         }
         
         public String getResId() {

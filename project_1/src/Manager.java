@@ -41,12 +41,12 @@ public class Manager {
         schedule();
     }
 
-    public void relRes(String resId, int relUnits, Process process) {
+    public void relRes(String resId, int relUnits, Process process, final boolean isDelete) {
         Resource res = resources.get(resId);
-        res.releaseRes(relUnits, process);
+        res.releaseRes(relUnits, process, isDelete);
         final boolean isProcessFree = process.isProcessFree();
 
-        if (isProcessFree) {
+        if (isProcessFree && !isDelete) {
             insertProcessIntoReadyList(process);
         }
 
@@ -120,7 +120,7 @@ public class Manager {
         current.setType(ProcessType.RUNNING);
         if (hasSwitchContext) detachProcessFromList(current);
 
-        System.out.println(current.getId() + " priority: " + current.getPriority() + " type: " + current.getType());
+        System.out.println(current.getId() + " priority: " + current.getPriority() + current.getResInfo());
     }
 
     public Process getRunningProcess() {

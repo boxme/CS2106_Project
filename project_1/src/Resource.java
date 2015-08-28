@@ -42,11 +42,14 @@ public class Resource {
         return isSuccess;
     }
 
-    public void releaseRes(int relUnits, Process process) {
+    public void releaseRes(int relUnits, Process process, final boolean isDelete) {
         relUnits = relUnits <= MAX_UNIT ? relUnits : MAX_UNIT;
         final int unitsFreed = process.relRes(id, relUnits); 
         freeUnits += unitsFreed;
-        waitingList.remove(process);
+
+        if (isDelete || !process.isProcessWaitingForRes(id)) {
+            waitingList.remove(process);
+        }
     }
 
     public LinkedList<Process> getWaitingList() {

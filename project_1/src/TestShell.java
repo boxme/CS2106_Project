@@ -40,7 +40,8 @@ public class TestShell {
                     final String resName = sc.next();
                     final int unitsRel = sc.nextInt();
                     final Process current = manager.getRunningProcess();
-                    manager.relRes(resName, unitsRel, current);
+                    final boolean isDelete = false;
+                    manager.relRes(resName, unitsRel, current, isDelete);
                     break;
                 }
                 case "to": {
