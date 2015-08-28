@@ -35,9 +35,15 @@ public class Resource {
             process.setType(ProcessType.BLOCKED);
             process.setList(waitingList);
             waitingList.offer(process);
+        } else {
+            process.setResAllocation(id);
         }
 
         return isSuccess;
+    }
+
+    public void releaseRes(int relUnits, Process process) {
+
     }
 
     public LinkedList<Process> getWaitingList() {

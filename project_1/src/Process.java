@@ -17,6 +17,19 @@ public class Process {
         this.children = new ArrayList<>();
         resList = new LinkedList<>();
     }
+
+    public void setResAllocation(String resId) {
+        final int size = resList.size();
+        AllocatedRes res;
+
+        for (int i = 0; i < size; ++i) {
+            res = resList.get(i);
+            if (res.getResId().equalsIgnoreCase(resId)) {
+                res.setSuccessfullAllocation();
+                return;
+            }
+        }
+    }
     
     /**
      * @return res units allocated to process
@@ -25,12 +38,12 @@ public class Process {
         final int size = resList.size();
         AllocatedRes res; 
         boolean found = false;
-        int allocatedUnits = resUnits;
+        int reqUnits = resUnits;
 
         for (int i = 0; i < size; ++i) {
             res = resList.get(i);
             if (res.getResId().equalsIgnoreCase(resId)) {
-                allocatedUnits = res.setRequestedUnits(resUnits); 
+                reqUnits = res.setRequestedUnits(resUnits); 
                 found = true;
             }
         }
@@ -40,7 +53,7 @@ public class Process {
             resList.offer(res); 
         }
 
-        return allocatedUnits;
+        return reqUnits;
     }
     
     public void setParent(Process parent) { this.parent = parent; }
@@ -69,33 +82,43 @@ public class Process {
     
     private static class AllocatedRes {
         private String resId;
-        private int requestedUnits;
+        private int waitingUnits;
+        private int allocatedUnits;
         
         public AllocatedRes(String resId, int requestedUnits) {
             this.resId = resId;
-            this.requestedUnits = requestedUnits;
+            this.waitingUnits = requestedUnits;
+            this.allocatedUnits = 0;
         }
         
         public String getResId() {
             return resId;
         }
-      
+     
+        public void setSuccessfullAllocation() {
+            allocatedUnits += waitingUnits;
+            waitingUnits = 0;
+        }
+
         /**
          * @return actual units allocated
          */
         public int setRequestedUnits(int reqUnits) {
-            if (this.requestedUnits + reqUnits <= Resource.MAX_UNIT) {
-                this.requestedUnits += reqUnits;
-                return reqUnits;
+            if (allocatedUnits + waitingUnits + reqUnits <= Resource.MAX_UNIT) {
+                waitingUnits += reqUnits;
             } else {
-                final int prevReqUnits = this.requestedUnits;
-                this.requestedUnits = Resource.MAX_UNIT;
-                return this.requestedUnits - prevReqUnits;
+                final int validReqUnits = Resource.MAX_UNIT - allocatedUnits - waitingUnits;
+                waitingUnits += validReqUnits;
             }
+            return waitingUnits;
         }
 
         public int getReqUnits() {
-            return requestedUnits;
+            return waitingUnits;
+        }
+
+        public int getAllocatedUnits() {
+            return allocatedUnits;
         }
     }
 }
