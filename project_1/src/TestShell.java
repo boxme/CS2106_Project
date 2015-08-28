@@ -32,12 +32,15 @@ public class TestShell {
                 }
                 case "req": {
                     final String resName = sc.next();
-                    final int unitsAllocated = sc.nextInt();
+                    final int unitsReq = sc.nextInt();
+                    manager.reqRes(resName, unitsReq);
                     break;
                 }
                 case "rel": {
                     final String resName = sc.next();
-                    final int unitsFreed = sc.nextInt();
+                    final int unitsRel = sc.nextInt();
+                    final Process current = manager.getRunningProcess();
+                    manager.relRes(resName, unitsRel, current);
                     break;
                 }
                 case "to": {

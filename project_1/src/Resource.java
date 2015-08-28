@@ -43,7 +43,10 @@ public class Resource {
     }
 
     public void releaseRes(int relUnits, Process process) {
-
+        relUnits = relUnits <= MAX_UNIT ? relUnits : MAX_UNIT;
+        final int unitsFreed = process.relRes(id, relUnits); 
+        freeUnits += unitsFreed;
+        waitingList.remove(process);
     }
 
     public LinkedList<Process> getWaitingList() {

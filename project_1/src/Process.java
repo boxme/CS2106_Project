@@ -19,41 +19,60 @@ public class Process {
     }
 
     public void setResAllocation(String resId) {
-        final int size = resList.size();
-        AllocatedRes res;
-
-        for (int i = 0; i < size; ++i) {
-            res = resList.get(i);
-            if (res.getResId().equalsIgnoreCase(resId)) {
-                res.setSuccessfullAllocation();
-                return;
-            }
-        }
+        AllocatedRes res = getRes(resId);
+        res.setSuccessfullAllocation();
     }
     
     /**
      * @return res units allocated to process
      */
     public int reqRes(String resId, int resUnits) {
-        final int size = resList.size();
-        AllocatedRes res; 
-        boolean found = false;
         int reqUnits = resUnits;
-
-        for (int i = 0; i < size; ++i) {
-            res = resList.get(i);
-            if (res.getResId().equalsIgnoreCase(resId)) {
-                reqUnits = res.setRequestedUnits(resUnits); 
-                found = true;
-            }
-        }
+        AllocatedRes res = getRes(resId);
         
-        if (!found) {
+        if (res == null) {
             res = new AllocatedRes(resId, resUnits); 
             resList.offer(res); 
+        } else {
+            reqUnits = res.setRequestedUnits(resUnits);
         }
 
         return reqUnits;
+    }
+
+    public int relRes(String resId, int relUnits) {
+        AllocatedRes res = getRes(resId);
+        int releasedUnits = 0;
+
+        if (res != null) {
+            releasedUnits = res.releaseUnits(relUnits);
+        }
+
+        return releasedUnits;
+    }
+
+    public boolean isProcessFree() {
+        boolean isFree = true;
+        final int size = resList.size();
+        AllocatedRes res;
+        for (int i = 0; i < size; ++i) {
+            res = resList.get(i);
+            isFree = res.getWaitingUnits() == 0 && isFree;
+        }
+
+        return isFree;
+    }
+
+    private AllocatedRes getRes(String resId) {
+        final int size = resList.size();
+        AllocatedRes res;
+        for (int i = 0; i < size; ++i) {
+            res = resList.get(i);
+            if (res.getResId().equalsIgnoreCase(resId)) {
+                return res;
+            }
+        }
+        return null;
     }
     
     public void setParent(Process parent) { this.parent = parent; }
@@ -113,7 +132,18 @@ public class Process {
             return waitingUnits;
         }
 
-        public int getReqUnits() {
+        public int releaseUnits(int relUnits) {
+            if (allocatedUnits >= relUnits) {
+                allocatedUnits -= relUnits;
+                return relUnits;
+            } else {
+                final int freedUnits = relUnits - allocatedUnits;
+                allocatedUnits = 0;
+                return freedUnits;
+            }
+        }
+
+        public int getWaitingUnits() {
             return waitingUnits;
         }
 

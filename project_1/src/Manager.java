@@ -41,6 +41,18 @@ public class Manager {
         schedule();
     }
 
+    public void relRes(String resId, int relUnits, Process process) {
+        Resource res = resources.get(resId);
+        res.releaseRes(relUnits, process);
+        final boolean isProcessFree = process.isProcessFree();
+
+        if (isProcessFree) {
+            insertProcessIntoReadyList(process);
+        }
+
+        schedule();
+    }
+
     public void timeOut() {
         if (current != null) {
             insertProcessIntoReadyList(current);
@@ -109,6 +121,10 @@ public class Manager {
         if (hasSwitchContext) detachProcessFromList(current);
 
         System.out.println(current.getId() + " priority: " + current.getPriority() + " type: " + current.getType());
+    }
+
+    public Process getRunningProcess() {
+        return current;
     }
 
     private void detachProcessFromList(Process process) {
