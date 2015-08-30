@@ -29,6 +29,7 @@ public class TestShell {
                 }
                 case "de": {
                     final String processId = sc.next();
+                    manager.deleteProcess(processId);
                     break;
                 }
                 case "req": {

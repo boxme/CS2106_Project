@@ -51,6 +51,18 @@ public class Process {
         return releasedUnits;
     }
 
+    public void releaseAllResources() {
+        final int resSize = resList.size();
+        final boolean isDelete = true;
+        final Manager manager = Manager.getInstance();
+        AllocatedRes res;
+        for (int i = 0; i < resSize; ++i) {
+            res = resList.get(i);
+            manager.relRes(res.getResId(), Resource.MAX_UNIT, this, isDelete);
+        }
+        resList.clear();
+    }
+
     public int getWaitingResUnits(String resId) {
         AllocatedRes res = getRes(resId);
         int waitingUnits = 0;
@@ -158,7 +170,9 @@ public class Process {
         }
 
         public int releaseUnits(int relUnits) {
-            if (allocatedUnits >= relUnits) {
+            if (allocatedUnits == 0) {
+                return 0;
+            } else if (allocatedUnits >= relUnits) {
                 allocatedUnits -= relUnits;
                 return relUnits;
             } else {

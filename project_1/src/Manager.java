@@ -43,16 +43,28 @@ public class Manager {
     public void relRes(String resId, int relUnits, Process process, final boolean isDelete) {
         Resource res = resources.get(resId);
         res.releaseRes(relUnits, process, isDelete);
-        final boolean isProcessFree = process.isProcessFree();
 
         if (!isDelete) {
-            final Process waitingProcess = res.getRunnableProcessFromWaitingList();
-            if (waitingProcess != null) {
-                final int waitingUnits = waitingProcess.getWaitingResUnits(resId);
-                res.isRequestSuccessfull(waitingUnits, waitingProcess);
-                insertProcessIntoReadyListHead(waitingProcess);
-                timeOut();
-            }
+            runProcessOnWaitingList(resId);
+        }
+    }
+
+    private void checkWaitingListOfAllRes() {
+        Set<String> keySet = resources.keySet();
+        for (Iterator<String> iter = keySet.iterator(); iter.hasNext();) {
+            String resId = iter.next();
+            runProcessOnWaitingList(resId);
+        }
+    }
+
+    private void runProcessOnWaitingList(String resId) {
+        Resource res = resources.get(resId);
+        final Process waitingProcess = res.getRunnableProcessFromWaitingList();
+        if (waitingProcess != null) {
+            final int waitingUnits = waitingProcess.getWaitingResUnits(resId);
+            res.isRequestSuccessfull(waitingUnits, waitingProcess);
+            insertProcessIntoReadyList(waitingProcess);
+            timeOut();
         }
     }
 
@@ -60,6 +72,62 @@ public class Manager {
         if (current != null) {
             insertProcessIntoReadyList(current);
             current = null;
+        }
+    }
+
+    public void deleteProcess(String id) {
+        Process process = searchForProcess(id);
+        deleteProcess(process);
+        checkWaitingListOfAllRes();
+    }
+
+    private Process searchForProcess(String id) {
+        LinkedList<Process> queue;
+        Process process = null;
+        
+        if (current != null && current.getId().equalsIgnoreCase(id)) {
+            process = current;
+            current = null;
+            return process;
+        }
+
+        final int lowerBound = ProcessPriority.USER.getLevel(); 
+        final int upperBound = ProcessPriority.SYSTEM.getLevel();
+        for (int i = upperBound; i >= lowerBound; --i) {
+            queue = readyList.get(i);
+            process = queue.peek();
+            if (process != null && process.getId().equalsIgnoreCase(id)) {
+                break;
+            }
+        }     
+
+        return process;
+    }
+
+    private void deleteProcess(final Process process) {
+        if (process == null) return;
+        
+        ArrayList<Process> children = process.getChildren();
+        final int size = children.size();
+        Process child = null;
+        for (int i = 0; i < size; ++i) {
+            child = children.get(i);
+            deleteProcess(child);
+        }
+        children.clear();
+
+        process.releaseAllResources();
+
+        LinkedList<Process> list = process.getList();
+        if (list != null) {
+            list.remove(process);
+            process.setList(null);
+        }
+
+        final Process parent = process.getParent();
+        if (parent != null) {
+            parent.removeChild(process);
+            process.setParent(null);
         }
     }
 
@@ -87,15 +155,6 @@ public class Manager {
         final int priorityLevel = priority.getLevel();
         readyList.get(priorityLevel).offer(newProcess);
         newProcess.setList(readyList.get(priorityLevel));
-    }
-
-    private void insertProcessIntoReadyListHead(Process process) {
-        final int priorityLevel = ProcessPriority.SYSTEM.getLevel();
-        final int realPriorityLevel = process.getPriority().getLevel();
-
-        process.setType(ProcessType.READY);
-        process.setList(readyList.get(realPriorityLevel));
-        readyList.get(priorityLevel).push(process); 
     }
 
     public void schedule() {
