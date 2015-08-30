@@ -3,13 +3,35 @@ import java.util.*;
 
 public class TestShell {
     public static void main(String[] args) throws IOException {
-        Scanner sc;
-        BufferedReader br;
+        Scanner sc = null;
+        BufferedReader br = null;
+        boolean isReadFromFile = false;
 
-        sc = new Scanner(System.in);
-        // if (args.length == 0) {
-        //     sc = new Scanner(System.in);
-        // }
+        if (args.length == 0) {
+            sc = new Scanner(System.in);
+        } else {
+            String filePath = args[0];
+            br = new BufferedReader(new FileReader(filePath));
+            sc = new Scanner(br);
+            isReadFromFile = true;
+            PrintStream out = null;
+
+            if (filePath.contains(":\\")) {
+                int index = 0;
+                for (int i = filePath.length() - 1; i >= 0; --i) {
+                    if (filePath.charAt(i) == '\\') {
+                        index = i + 1;
+                        break;
+                    }
+                }
+
+                String outFilePath = filePath.substring(0, index);
+                out = new PrintStream(new FileOutputStream(outFilePath+"desmond.txt"));
+            } else {
+                out = new PrintStream(new FileOutputStream("desmond.txt"));
+            }
+            System.setOut(out);
+        }
 
         final Manager manager = Manager.getInstance();
         manager.createProcess(ProcessPriority.INIT, "INIT");
@@ -55,6 +77,9 @@ public class TestShell {
                 }
                 case "exit": {
                     sc.close();
+                    if (isReadFromFile) {
+                        br.close();
+                    }
                     System.exit(0);
                     break;
                 } 
