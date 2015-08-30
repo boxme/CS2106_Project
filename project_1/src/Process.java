@@ -51,13 +51,14 @@ public class Process {
         return releasedUnits;
     }
 
-    public boolean isProcessWaitingForRes(String resId) {
+    public int getWaitingResUnits(String resId) {
         AllocatedRes res = getRes(resId);
+        int waitingUnits = 0;
         if (res != null) {
-            return res.getWaitingUnits() == 0;
+            waitingUnits = res.getWaitingUnits();
         }
 
-        return false;
+        return waitingUnits;
     }
 
     public boolean isProcessFree() {

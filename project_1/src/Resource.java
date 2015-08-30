@@ -46,10 +46,27 @@ public class Resource {
         relUnits = relUnits <= MAX_UNIT ? relUnits : MAX_UNIT;
         final int unitsFreed = process.relRes(id, relUnits); 
         freeUnits += unitsFreed;
-
-        if (isDelete || !process.isProcessWaitingForRes(id)) {
+        
+        if (isDelete) {
             waitingList.remove(process);
         }
+    }
+
+    /**
+     * @return the next process in the waiting list that has might be able to run
+     */
+    public Process getRunnableProcessFromWaitingList() {
+        Process process = null;
+        final int size = waitingList.size();
+        for (int i = 0; i < size; ++i) {
+            process = waitingList.get(i);
+            int waitingUnits = process.getWaitingResUnits(id);
+            if (freeUnits >= waitingUnits) {
+                waitingList.remove(process);
+                break;
+            }
+        }
+        return process;
     }
 
     public LinkedList<Process> getWaitingList() {

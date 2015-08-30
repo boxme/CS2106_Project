@@ -38,7 +38,6 @@ public class Manager {
         if (!isSuccess) {
             current = null;
         }
-        schedule();
     }
 
     public void relRes(String resId, int relUnits, Process process, final boolean isDelete) {
@@ -46,11 +45,15 @@ public class Manager {
         res.releaseRes(relUnits, process, isDelete);
         final boolean isProcessFree = process.isProcessFree();
 
-        if (isProcessFree && !isDelete) {
-            insertProcessIntoReadyList(process);
+        if (!isDelete) {
+            final Process waitingProcess = res.getRunnableProcessFromWaitingList();
+            if (waitingProcess != null) {
+                final int waitingUnits = waitingProcess.getWaitingResUnits(resId);
+                res.isRequestSuccessfull(waitingUnits, waitingProcess);
+                insertProcessIntoReadyListHead(waitingProcess);
+                timeOut();
+            }
         }
-
-        schedule();
     }
 
     public void timeOut() {
@@ -58,14 +61,12 @@ public class Manager {
             insertProcessIntoReadyList(current);
             current = null;
         }
-        schedule();
     }
 
     public void createProcess(ProcessPriority priority, String id) {
         Process newProcess = new Process(priority, id);
         linkedNewProcessToCurrent(newProcess);
         insertProcessIntoReadyList(newProcess);
-        schedule();
     }
 
     private void linkedNewProcessToCurrent(Process newProcess) {
@@ -88,7 +89,16 @@ public class Manager {
         newProcess.setList(readyList.get(priorityLevel));
     }
 
-    private void schedule() {
+    private void insertProcessIntoReadyListHead(Process process) {
+        final int priorityLevel = ProcessPriority.SYSTEM.getLevel();
+        final int realPriorityLevel = process.getPriority().getLevel();
+
+        process.setType(ProcessType.READY);
+        process.setList(readyList.get(realPriorityLevel));
+        readyList.get(priorityLevel).push(process); 
+    }
+
+    public void schedule() {
         LinkedList<Process> queue;
         Process process;
 

@@ -13,6 +13,7 @@ public class TestShell {
 
         final Manager manager = Manager.getInstance();
         manager.createProcess(ProcessPriority.INIT, "INIT");
+        manager.schedule();
 
         while (true) {
             switch (sc.next()) {
@@ -61,6 +62,7 @@ public class TestShell {
                    break;
                 }
             }
+            manager.schedule();
         }
     }
 }
